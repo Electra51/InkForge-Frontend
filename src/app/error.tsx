@@ -12,6 +12,7 @@ const error = ({
   useEffect(() => {
     console.error(error);
   }, []);
+
   return (
     <div>
       <h2>Something went wrong. Please try again</h2>
