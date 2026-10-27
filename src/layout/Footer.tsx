@@ -1,152 +1,185 @@
-import { cn } from "cn";
+import Image from "next/image";
+import Link from "next/link";
+
+import { cn } from "@/lib/utils";
 
 interface FooterLink {
   name: string;
   href: string;
+  external?: boolean;
 }
+
 interface FooterSection {
   title: string;
   links: FooterLink[];
 }
-interface FooterLogo {
-  url: string;
-  src: string;
-  alt: string;
-  title: string;
-}
 
-interface FooterBasicProps {
-  logo?: FooterLogo;
+interface FooterProps {
   description?: string;
   sections?: FooterSection[];
-  copyright?: string;
+  socialLinks?: FooterLink[];
   legalLinks?: FooterLink[];
   className?: string;
 }
 
-interface Footer2Props extends FooterBasicProps {
-  logoClassName?: string;
-}
-type Props = Partial<Footer2Props>;
-
-const defaultProps: Footer2Props = {
-  logo: {
-    url: "/",
-    src: "/images/logo.svg",
-    alt: "logo",
-    title: "InkForge",
+const defaultSections: FooterSection[] = [
+  {
+    title: "Explore",
+    links: [
+      { name: "Home", href: "/" },
+      { name: "All posts", href: "/blog" },
+      { name: "Popular posts", href: "/blog?sort=popular" },
+      { name: "Latest posts", href: "/blog?sort=latest" },
+    ],
   },
-  description: "Forge your thoughts, publish your stories.",
-  sections: [
-    {
-      title: "Product",
-      links: [
-        { name: "Overview", href: "#" },
-        { name: "Pricing", href: "#" },
-        { name: "Marketplace", href: "#" },
-        { name: "Features", href: "#" },
-        { name: "Integrations", href: "#" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { name: "About", href: "#" },
-        { name: "Team", href: "#" },
-        { name: "Blog", href: "#" },
-        { name: "Careers", href: "#" },
-        { name: "Contact", href: "#" },
-      ],
-    },
-    {
-      title: "Support",
-      links: [
-        { name: "Help center", href: "#" },
-        { name: "Documentation", href: "#" },
-        { name: "Status", href: "#" },
-        { name: "Community", href: "#" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { name: "Guides", href: "#" },
-        { name: "Templates", href: "#" },
-        { name: "Sales", href: "#" },
-        { name: "Advertise", href: "#" },
-      ],
-    },
-  ],
-  copyright: "© 2026 inkforge.com. All rights reserved.",
-  legalLinks: [
-    { name: "Terms and Conditions", href: "#" },
-    { name: "Privacy Policy", href: "#" },
-  ],
-};
+  {
+    title: "Topics",
+    links: [
+      { name: "Next.js", href: "/blog?tag=nextjs" },
+      { name: "TypeScript", href: "/blog?tag=typescript" },
+      { name: "React", href: "/blog?tag=react" },
+      { name: "Prisma", href: "/blog?tag=prisma" },
+    ],
+  },
+  {
+    title: "Write",
+    links: [
+      { name: "Start writing", href: "/dashboard/posts/new" },
+      { name: "My posts", href: "/dashboard/posts" },
+      { name: "Dashboard", href: "/dashboard" },
+      { name: "Create account", href: "/register" },
+    ],
+  },
+  {
+    title: "InkForge",
+    links: [
+      { name: "About", href: "/about" },
+      { name: "Contact", href: "/contact" },
+      { name: "Log in", href: "/login" },
+    ],
+  },
+];
 
-const MAX_SECTIONS = 4;
+const defaultSocialLinks: FooterLink[] = [
+  { name: "GitHub", href: "https://github.com/your-username", external: true },
+  {
+    name: "LinkedIn",
+    href: "https://linkedin.com/in/your-username",
+    external: true,
+  },
+];
 
-const Footer1 = (props: Props) => {
-  const { logo, description, sections, copyright, legalLinks, className } = {
-    ...defaultProps,
-    ...props,
-  };
+const defaultLegalLinks: FooterLink[] = [
+  { name: "Terms and Conditions", href: "/terms" },
+  { name: "Privacy Policy", href: "/privacy" },
+];
 
-  const visibleSections = (sections ?? []).slice(0, MAX_SECTIONS);
+const linkClass =
+  "rounded-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+function FooterAnchor({
+  link,
+  className,
+}: {
+  link: FooterLink;
+  className?: string;
+}) {
+  if (link.external) {
+    return (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(linkClass, className)}
+      >
+        {link.name}
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
+    );
+  }
 
   return (
-    <section className={cn("py-32", className)}>
-      <div className="container mx-auto">
-        <footer>
-          <div className="grid grid-cols-2 gap-8 lg:grid-cols-6">
-            <div className="col-span-2 mb-8 lg:mb-0">
-              <div className="flex items-center lg:justify-start">
-                <a href={logo?.url}>
-                  <img
-                    src={logo?.src}
-                    alt={logo?.alt}
-                    title={logo?.title}
-                    className="h-7 dark:invert"
-                  />
-                </a>
-                <p>{logo?.title}</p>
-              </div>
-              <p className="mt-4 text-sm font-medium text-muted-foreground">
-                {description}
-              </p>
-            </div>
-            {visibleSections.map((section, sectionIdx) => (
-              <div key={sectionIdx}>
-                <h3 className="mb-4 text-sm font-semibold tracking-tight">
-                  {section.title}
-                </h3>
-                <ul className="space-y-4 text-sm text-muted-foreground">
-                  {section.links.map((link, linkIdx) => (
-                    <li
-                      key={linkIdx}
-                      className="font-medium hover:text-primary"
-                    >
-                      <a href={link.href}>{link.name}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+    <Link href={link.href} className={cn(linkClass, className)}>
+      {link.name}
+    </Link>
+  );
+}
+
+export function Footer({
+  description = "Forge your thoughts, publish your stories.",
+  sections = defaultSections,
+  socialLinks = defaultSocialLinks,
+  legalLinks = defaultLegalLinks,
+  className,
+}: FooterProps) {
+  const year = new Date().getFullYear();
+
+  return (
+    <footer className={cn("border-t bg-background", className)}>
+      <div className="container mx-auto px-4 py-14 md:py-20">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-6">
+          {/* Brand */}
+          <div className="col-span-2">
+            <Link
+              href="/"
+              aria-label="InkForge home"
+              className="inline-flex items-center gap-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <Image
+                src="/images/logo.svg"
+                alt=""
+                width={28}
+                height={18}
+                className="h-8 w-12"
+              />
+              <span className="text-lg font-semibold tracking-tight">
+                InkForge
+              </span>
+            </Link>
+            <p className="mt-4 max-w-xs text-sm text-muted-foreground">
+              {description}
+            </p>
           </div>
-          <div className="mt-8 flex flex-col justify-between gap-4 border-t border-border pt-8 text-xs font-medium text-muted-foreground md:flex-row md:items-center">
-            <p>{copyright}</p>
-            <ul className="flex gap-4">
-              {legalLinks?.map((link, linkIdx) => (
-                <li key={linkIdx} className="underline hover:text-primary">
-                  <a href={link.href}>{link.name}</a>
+
+          {/* Link columns (max 4 so the grid never breaks) */}
+          {sections.slice(0, 4).map((section) => (
+            <nav key={section.title} aria-label={section.title}>
+              <h2 className="mb-4 text-sm font-semibold tracking-tight">
+                {section.title}
+              </h2>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                {section.links.map((link) => (
+                  <li key={link.href}>
+                    <FooterAnchor link={link} />
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+
+        {/* Bottom bar */}
+        <div className="mt-12 flex flex-col gap-4 border-t pt-8 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
+          <p>© {year} InkForge. All rights reserved.</p>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+            <ul className="flex flex-wrap gap-x-4 gap-y-2">
+              {socialLinks.map((link) => (
+                <li key={link.href}>
+                  <FooterAnchor link={link} />
+                </li>
+              ))}
+            </ul>
+            <ul className="flex flex-wrap gap-x-4 gap-y-2">
+              {legalLinks.map((link) => (
+                <li key={link.href}>
+                  <FooterAnchor link={link} className="underline" />
                 </li>
               ))}
             </ul>
           </div>
-        </footer>
+        </div>
       </div>
-    </section>
+    </footer>
   );
-};
-
-export { Footer1 };
+}
