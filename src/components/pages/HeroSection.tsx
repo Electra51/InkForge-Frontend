@@ -44,7 +44,7 @@ export function HeroSection({
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
               {/* Proxy/middleware redirects logged-out users to /login?callbackUrl=... */}
-              <Link href="/dashboard/posts/new">
+              <Link href="/dashboard/posts">
                 <PenLine aria-hidden="true" />
                 Start writing
               </Link>
