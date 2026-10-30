@@ -260,11 +260,26 @@ export function LoginForm({
     setLoading(false);
   }
 
+  // const handleGoogleLogin = async () => {
+  //   const data = authClient.signIn.social({
+  //     provider: "google",
+  //     callbackURL: "http://localhost:3000",
+  //   });
+  // };
+
   const handleGoogleLogin = async () => {
-    const data = authClient.signIn.social({
-      provider: "google",
-    });
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "http://localhost:3000",
+      });
+    } catch (error) {
+      console.error("Google login failed:", error);
+    }
   };
+
+  const session = authClient.getSession();
+  console.log("session", session);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
