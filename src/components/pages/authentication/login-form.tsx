@@ -227,6 +227,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -259,9 +260,11 @@ export function LoginForm({
     setLoading(false);
   }
 
-  function handleGoogle() {
-    // TODO: Google login logic
-  }
+  const handleGoogleLogin = async () => {
+    const data = authClient.signIn.social({
+      provider: "google",
+    });
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -340,7 +343,11 @@ export function LoginForm({
               <FieldSeparator>Or continue with</FieldSeparator>
 
               <Field>
-                <Button variant="outline" type="button" onClick={handleGoogle}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => handleGoogleLogin()}
+                >
                   <GoogleIcon className="mr-2 h-4 w-4" />
                   Login with Google
                 </Button>
