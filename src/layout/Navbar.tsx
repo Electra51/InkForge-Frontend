@@ -17,8 +17,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { getDashboardUrl } from "@/constants/role";
+import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { ModeToggle } from "./ModeToggle";
+import { SessionUser, UserAvatar, UserMenu, useSignOut } from "./user-menu";
+
 interface MenuItem {
   title: string;
   url: string;
@@ -69,18 +73,26 @@ const Navbar = ({
   ],
   auth = {
     login: { title: "Login", url: "/login" },
-    signup: { title: "Sign up", url: "sign-up" },
+    // age "sign-up" chilo (leading "/" chhilo na), route name er sathe milie nio
+    signup: { title: "Sign up", url: "/sign-up" },
   },
   className,
 }: NavbarProps) => {
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user as SessionUser | undefined;
+  const signOut = useSignOut();
+  console.log("navbar role:", user?.role);
   return (
     <section className={cn("py-4", className)}>
       <div className="container mx-auto px-4">
         {/* Desktop Menu */}
-        <nav className="hidden items-center justify-between lg:flex">
+        <nav
+          aria-label="Main"
+          className="hidden items-center justify-between lg:flex"
+        >
           <div className="flex items-center gap-6">
             {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
+            <Link href={logo.url} className="flex items-center gap-2">
               <img
                 src={logo.src}
                 className="max-h-8 dark:invert"
@@ -89,7 +101,7 @@ const Navbar = ({
               <span className="text-lg font-semibold tracking-tighter">
                 {logo.title}
               </span>
-            </a>
+            </Link>
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
@@ -98,14 +110,29 @@ const Navbar = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex items-center gap-2">
             <ModeToggle />
-            <Button asChild variant="outline" size="sm">
-              <Link href={auth.login.url}>{auth.login.title}</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href={auth.signup.url}>{auth.signup.title}</Link>
-            </Button>
+            {isPending ? (
+              // layout shift charte skeleton
+              <div
+                className="h-8 w-8 animate-pulse rounded-full bg-muted"
+                aria-hidden="true"
+              />
+            ) : user ? (
+              <>
+                <UserMenu user={user} />
+              </>
+            ) : (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <Link href={auth.login.url}>{auth.login.title}</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link href={auth.signup.url}>{auth.signup.title}</Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 
@@ -113,44 +140,75 @@ const Navbar = ({
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
+            <Link href={logo.url} className="flex items-center gap-2">
               <img
                 src={logo.src}
                 className="max-h-8 dark:invert"
                 alt={logo.alt}
               />
-            </a>
+            </Link>
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" aria-label="Open menu">
                   <Menu className="size-4" />
                 </Button>
               </SheetTrigger>
               <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>
-                    <a href={logo.url} className="flex items-center gap-2">
+                    <Link href={logo.url} className="flex items-center gap-2">
                       <img
                         src={logo.src}
                         className="max-h-8 dark:invert"
                         alt={logo.alt}
                       />
-                    </a>
+                    </Link>
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-6 p-4">
-                  {/* <Accordion className="flex w-full flex-col gap-4"> */}
                   {menu.map((item) => renderMobileMenuItem(item))}
-                  {/* </Accordion> */}
 
                   <div className="flex flex-col gap-3">
                     <ModeToggle />
-                    <Button asChild variant="outline">
-                      <Link href={auth.login.url}>{auth.login.title}</Link>
-                    </Button>
-                    <Button asChild>
-                      <Link href={auth.signup.url}>{auth.signup.title}</Link>
-                    </Button>
+                    {isPending ? (
+                      <div
+                        className="h-10 animate-pulse rounded-md bg-muted"
+                        aria-hidden="true"
+                      />
+                    ) : user ? (
+                      <>
+                        <div className="flex items-center gap-3 rounded-lg border p-3">
+                          <UserAvatar user={user} className="size-10" />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">
+                              {user.name}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {user.email}
+                            </p>
+                          </div>
+                        </div>
+                        <Button asChild>
+                          <Link href={getDashboardUrl(user.role)}>
+                            Dashboard
+                          </Link>
+                        </Button>
+                        <Button variant="outline" onClick={signOut}>
+                          Log out
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button asChild variant="outline">
+                          <Link href={auth.login.url}>{auth.login.title}</Link>
+                        </Button>
+                        <Button asChild>
+                          <Link href={auth.signup.url}>
+                            {auth.signup.title}
+                          </Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </SheetContent>
@@ -177,9 +235,9 @@ const renderMenuItem = (item: MenuItem) => {
 
 const renderMobileMenuItem = (item: MenuItem) => {
   return (
-    <a key={item.title} href={item.url} className="text-md font-semibold">
+    <Link key={item.title} href={item.url} className="text-md font-semibold">
       {item.title}
-    </a>
+    </Link>
   );
 };
 
