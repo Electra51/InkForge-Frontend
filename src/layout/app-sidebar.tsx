@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { isAdmin } from "@/constants/role";
 import { VersionSwitcher } from "@/layout/version-switcher";
 import { adminRoutes } from "@/routes/adminRoutes";
 import { userRoutes } from "@/routes/userRoutes";
@@ -60,19 +61,7 @@ export function AppSidebar({
 }: {
   user: { role: string };
 } & React.ComponentProps<typeof Sidebar>) {
-  let routes: Route[] = [];
-  switch (user.role) {
-    case "admin":
-      routes = adminRoutes;
-      break;
-    case "user":
-      routes = userRoutes;
-      break;
-
-    default:
-      routes = [];
-      break;
-  }
+  const routes: Route[] = isAdmin(user.role) ? adminRoutes : userRoutes;
 
   console.log("User role:", user.role);
   console.log("Routes:", routes);
