@@ -1,8 +1,10 @@
 import { HeroSection } from "@/components/pages/HeroSection";
+import { userService } from "@/services/user.service";
 
 export default async function Home() {
-  // const session = await authClient.getSession();
-  // console.log("session", session);
+  const { data } = await userService.getSession();
+  console.log(data);
+
   return (
     <div>
       <HeroSection />
